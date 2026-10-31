@@ -25,7 +25,7 @@ jobs:
 
       - name: Extract Android project
         run: |
-          unzip -q MochiAndroid-Source.zip -d extracted
+          unzip -q MochiV2-Android-Source.zip -d extracted
           cp -R extracted/MochiAndroid/. .
 
       - name: Fix Java and Kotlin compatibility
