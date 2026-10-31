@@ -1,5 +1,5 @@
 
-name: Build Mochi APK
+name: Build Mochi V2 APK
 
 on:
   workflow_dispatch:
@@ -24,47 +24,25 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Find and extract Mochi project
-        shell: bash
+      - name: Extract Mochi V2
         run: |
           set -e
-
-          ZIP_FILE=$(find . -maxdepth 1 -type f -iname '*.zip' | sort | head -n 1)
-
-          if [ -z "$ZIP_FILE" ]; then
-            echo "No ZIP file found in repository root."
-            exit 1
-          fi
-
-          echo "Using ZIP: $ZIP_FILE"
-
-          mkdir -p extracted
-          unzip -q "$ZIP_FILE" -d extracted
-
-          SETTINGS_FILE=$(find extracted -type f \( -name 'settings.gradle' -o -name 'settings.gradle.kts' \) -print -quit)
-
-          if [ -z "$SETTINGS_FILE" ]; then
-            echo "Gradle project not found inside ZIP."
-            exit 1
-          fi
-
-          PROJECT_DIR=$(dirname "$SETTINGS_FILE")
-          cp -a "$PROJECT_DIR"/. .
-
-          echo "Project extracted successfully."
+          mkdir extracted
+          unzip -q MochiV2-Android-Source.zip -d extracted
+          cp -a extracted/MochiV2/. .
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      - name: Build APK
+      - name: Build V2 APK
         run: gradle --no-daemon assembleDebug
 
-      - name: Upload Mochi APK
+      - name: Upload V2 APK
         uses: actions/upload-artifact@v4
         with:
-          name: Mochi-APK
+          name: Mochi-V2-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           
