@@ -1,5 +1,5 @@
 
-name: Build Mochi V2.2 APK
+name: Build Mochi V2.3 APK
 
 on:
   workflow_dispatch:
@@ -25,15 +25,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Extract Mochi V2.2 Source
+      - name: Extract Mochi source ZIP
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
-          ZIP_FILE="MochiV2-Transparent-Clean-DoubleTap-Source.zip"
+          ZIP_FILE="MochiV2-Clean-Transparent-Anime-Source.zip"
 
           if [ ! -f "$ZIP_FILE" ]; then
-            echo "Source ZIP not found!"
+            echo "ERROR: Source ZIP not found!"
             ls -la
             exit 1
           fi
@@ -46,14 +46,19 @@ jobs:
             -print -quit)
 
           if [ -z "$SETTINGS_FILE" ]; then
-            echo "Gradle project not found!"
+            echo "ERROR: Gradle project not found!"
+            find extracted -maxdepth 4 -type f
             exit 1
           fi
 
           PROJECT_DIR=$(dirname "$SETTINGS_FILE")
           cp -a "$PROJECT_DIR"/. .
 
-          echo "Mochi V2.2 extracted."
+          if [ ! -f app/build.gradle ] && \
+             [ ! -f app/build.gradle.kts ]; then
+            echo "ERROR: App Gradle file not found!"
+            exit 1
+          fi
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -63,10 +68,10 @@ jobs:
       - name: Build Mochi APK
         run: gradle --no-daemon assembleDebug
 
-      - name: Upload Mochi V2.2 APK
+      - name: Upload Mochi APK
         uses: actions/upload-artifact@v4
         with:
-          name: Mochi-V2.2-APK
+          name: Mochi-V2.3-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
